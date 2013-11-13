@@ -17,22 +17,19 @@
 	<!-- Inline css -->
 	<style>
 
-	#welcomeHeader {
-		text-align: center;
-		margin-bottom: 30px;
+	#signupform .input-group-addon {
+		width: 110px;
 	}
 
-	#loginForm {
-		height: 175px;
-		width: 385px;
-		padding: 32px;
-		margin-left: auto;
-		margin-right: auto;
+	#signupform .form-control {
+		width: 300px;
 	}
 
-	#loginForm > div, #loginForm > button {
-		padding-bottom: 5px;
+	#signupform .input-group {
+		padding-bottom: 7px;
 	}
+
+	
 
 
 	</style>
@@ -91,22 +88,46 @@
 
 	<div class="container">
 
-		<h1 id="welcomeHeader">Welcome to the Charleston Paddler</h1>
+	<h2>Create an account</h2>
+	<br />
 
-		
-		<form id="loginForm" class="form-horizontal well">
+		<!-- Sign up form -->
+		<form id="signupform">
+			<div class="panel">
+			<div class="input-group">
+  			<span class="input-group-addon">Email</span>
+				<input type="text" class="form-control">
+			</div>
+			<div class="input-group">
+  			<span class="input-group-addon">First Name</span>
+				<input type="text" class="form-control">
+			</div>
+			<div class="input-group">
+  			<span class="input-group-addon">Last Name</span>
+				<input type="text" class="form-control">
+			</div>
+			<div class="input-group">
+  			<span class="input-group-addon">Phone</span>
+				<input type="text" class="form-control">
+			</div>
+			</div>
+
+			<div class="panel">
 			
-			<div class="input-group span6">
-        <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
-        <input type="text" class="form-control" placeholder="Email" required autofocus />
-    </div>
-    <div class="input-group">
-        <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-        <input type="password" class="form-control" placeholder="Password" required />
-    </div>
-		<button id="loginButton" class="btn btn-primary">Login</button> or <a href="signup.html">sign up here.</a>
-		</form>
+			<div class="input-group">
+  			<span class="input-group-addon">Password</span>
+				<input type="password" class="form-control">
+			</div>
+			<div class="input-group">
+  			<span class="input-group-addon">Re-enter PW</span>
+				<input type="password" class="form-control">
+			</div>
+			</div>
 
+			<button id="createAccount" class="btn btn-primary">Create account</button>
+
+		</form>
+		
 
 	</div> <!-- /container -->
 

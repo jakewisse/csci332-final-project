@@ -23,9 +23,37 @@ app.listen(8080);
 // Serve static files
 app.use(express.static(__dirname + '/static'));
 
+
 // Serve index.html
 app.get('/', function(req, res) {
 	res.sendfile(__dirname + '/index.html');
+});
+
+
+// signup.html
+app.get('/signup.html', function(req, res) {
+	res.sendfile(__dirname + '/signup.html');
+});
+
+
+// Create new account
+app.post('createAccount', function (req, res) {
+
+	// Create an object with the request body's params
+	var post = 
+	{
+		'Email': req.body.email,
+		'FirstName': req.body.firstName,
+		'LastName': req.body.lastName,
+		'Phone': req.body.phone,
+		'Password': req.body.password
+	};
+
+	// TODO: Execute stored procedure to insert new user
+
+	// TODO: Redirect user to makeReservation.html
+	
+
 });
 
 
