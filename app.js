@@ -15,9 +15,31 @@ var connection = mysql.createConnection({
 	'database': 'ChsPaddler'
 });
 
+// Object to store state (i.e. session, but really simple)
+var mysession = {
+	user: ''
+}
+
+//
+function checkAuth(req, res, next) {
+	if (!req.cookies.user) {
+		mysession.user = '';
+		next();
+	}
+	else {
+		mysession.user = req.cookies.user;
+		next();
+	}
+}
+
 var app = express();
-app.use(express.bodyParser());
+app.use(express.bodyParser()); // for POST requests
+app.use(express.cookieParser('notasecret')); // for signing cookies
+app.engine('html', require('ejs').__express); // for using the ejs templating engine
 app.listen(8080);
+
+// Set views directory
+app.set('views', __dirname + '/views');
 
 
 // Serve static files
@@ -26,13 +48,13 @@ app.use(express.static(__dirname + '/static'));
 
 // Serve index.html
 app.get('/', function(req, res) {
-	res.sendfile(__dirname + '/index.html');
+	res.render('index.html');
 });
 
 
 // signup.html
 app.get('/signup.html', function(req, res) {
-	res.sendfile(__dirname + '/signup.html');
+	res.render('signup.html');
 });
 
 
@@ -42,7 +64,7 @@ app.post('/createAccount', function (req, res) {
 	// Create an object with the request body's params
 	var post = 
 	{
-		'Email': req.body.email,
+		'email': req.body.email,
 		'FirstName': req.body.firstName,
 		'LastName': req.body.lastName,
 		'Phone': req.body.phone,
@@ -51,6 +73,7 @@ app.post('/createAccount', function (req, res) {
 
 	// TODO: Execute stored procedure to insert new user
 
+	res.cookie('user', post.email)
 	res.json(post)
 
 	// TODO: Redirect user to makeReservation.html
