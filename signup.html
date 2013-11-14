@@ -13,6 +13,7 @@
 
 	<!-- Stylesheets -->
 	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 
 	<!-- Inline css -->
 	<style>
@@ -26,18 +27,78 @@
 	}
 
 	#signupform .input-group {
-		padding-bottom: 7px;
+		margin-bottom: 7px;
 	}
 
+	#passOkIcon {
+		margin-left: 10px;
+		color: green;
+		display: none;
+	}
 	
 
 
 	</style>
 
-
 	<script type="text/javascript" src="jquery/jquery-2.0.3.js"></script>
 
 	<script>
+
+	$(document).ready(function() {
+
+		// Submit
+		$("#createAccount").click(function() {
+			var errMsg = "";
+			if (!noneEmpty)
+				errMsg += "Please fill out all the fields.\n";
+			if (!passMatch)
+				errMsg += "Your passwords need to match!";
+			if (errMsg.length != 0) {
+				alert(errMsg);
+				return;
+			}
+
+			$.post("/createAccount",
+							$("#signupform").serializeArray(),
+							function(res) {
+								alert(res.FirstName);
+							});
+		});
+
+		// Validate input
+		var noneEmpty = false,
+				passMatch = true;
+
+		var $password = $("[name='password']");
+		var $passConfirm = $("[name='passConfirm']");
+		var $inputs = $("input");
+		var $passMatchIcon = $("i");
+
+		$password.add($passConfirm).keyup(function() {
+			if ($password.val() == $passConfirm.val() && $password.val().length > 0) {
+				$passMatchIcon.css("display", "inline-block");
+				passMatch = true;
+			}
+			else {
+				$passMatchIcon.css("display", "none");
+				passMatch = false;
+			}
+		});
+
+		$inputs.keyup(function() {
+			var stop = false;
+			$inputs.each(function() {
+				if ($(this).val().length > 0 && !stop)
+					noneEmpty = true;
+				else {
+					noneEmpty = false;
+					stop = true;
+				}
+			});
+		})
+
+	});
+
 
 	</script>
 
@@ -96,19 +157,19 @@
 			<div class="panel">
 			<div class="input-group">
   			<span class="input-group-addon">Email</span>
-				<input type="text" class="form-control">
+				<input type="text" class="form-control" name="email">
 			</div>
 			<div class="input-group">
   			<span class="input-group-addon">First Name</span>
-				<input type="text" class="form-control">
+				<input type="text" class="form-control" name="firstName">
 			</div>
 			<div class="input-group">
   			<span class="input-group-addon">Last Name</span>
-				<input type="text" class="form-control">
+				<input type="text" class="form-control" name="lastName">
 			</div>
 			<div class="input-group">
   			<span class="input-group-addon">Phone</span>
-				<input type="text" class="form-control">
+				<input type="text" class="form-control" name="phone">
 			</div>
 			</div>
 
@@ -116,18 +177,20 @@
 			
 			<div class="input-group">
   			<span class="input-group-addon">Password</span>
-				<input type="password" class="form-control">
+				<input type="password" class="form-control" name="password">
 			</div>
 			<div class="input-group">
   			<span class="input-group-addon">Re-enter PW</span>
-				<input type="password" class="form-control">
+				<input type="password" class="form-control" name="passConfirm">  <i id="passOkIcon" class="glyphicon glyphicon-ok"></i>
 			</div>
 			</div>
 
-			<button id="createAccount" class="btn btn-primary">Create account</button>
+			
+
+			
 
 		</form>
-		
+		<button id="createAccount" class="btn btn-primary">Create account</button>
 
 	</div> <!-- /container -->
 

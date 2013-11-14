@@ -37,7 +37,7 @@ app.get('/signup.html', function(req, res) {
 
 
 // Create new account
-app.post('createAccount', function (req, res) {
+app.post('/createAccount', function (req, res) {
 
 	// Create an object with the request body's params
 	var post = 
@@ -50,6 +50,8 @@ app.post('createAccount', function (req, res) {
 	};
 
 	// TODO: Execute stored procedure to insert new user
+
+	res.json(post)
 
 	// TODO: Redirect user to makeReservation.html
 	
