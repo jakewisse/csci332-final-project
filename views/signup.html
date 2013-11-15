@@ -58,17 +58,18 @@
 				return;
 			}
 
+			// Sending the request to create new user
 			$.post("/createAccount",
-							$("#signupform").serializeArray(),
-							function(res) {
-								alert(res.FirstName);
-							});
+				$("#signupform").serializeArray(),
+				function(res) {
+					alert('Success = ' + res.success +
+						'\nDuplicate = ' + res.dup);
+				});
 		});
 
 		// Validate input
 		var noneEmpty = false,
 				passMatch = true;
-
 		var $password = $("[name='password']");
 		var $passConfirm = $("[name='passConfirm']");
 		var $inputs = $("input");
@@ -116,7 +117,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="index.html">Charleston Paddler</a>
+				<a class="navbar-brand" href="/">Charleston Paddler</a>
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
