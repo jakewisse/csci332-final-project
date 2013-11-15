@@ -89,7 +89,6 @@ app.post('/createAccount', function (req, res) {
             res.json({success: true, dup: false});
     });
 
-
     // TODO: Set user cookie
 
     // TODO: Redirect user
