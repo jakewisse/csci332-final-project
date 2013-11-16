@@ -62,8 +62,10 @@
 			$.post("/createAccount",
 				$("#signupform").serializeArray(),
 				function(res) {
-					alert('Success = ' + res.success +
-						'\nDuplicate = ' + res.dup);
+					if (res.success == false)
+						alert(res.msg);
+					else
+						window.location = '/';
 				});
 		});
 

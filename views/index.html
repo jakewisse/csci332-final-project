@@ -10,8 +10,11 @@
 	<div class="container">
 
 		<h1 id="welcomeHeader">Welcome to the Charleston Paddler</h1>
-			
-		<div id="login-well" class="form-horizontal well">
+
+	<% if (!session.user) { %>
+
+	<!-- Login well -->	
+	<div id="login-well" class="form-horizontal well">
 		<form id="loginForm" >
 			<div class="input-group span6">
         <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
@@ -23,8 +26,18 @@
     </div>
 		<div style="text-align: center; margin-top: 10px;"><button id="loginButton" class="btn btn-primary">Login</button> or <a href="signup.html">sign up here.</a></div>
 		</form>
-
 	</div> <!-- /well -->
+
+	<% } %>
+	<% if (session.user) { %>
+
+	<h3>User Info</h3>
+	<p>First Name: <%= session.user.firstName %> </p>
+	<p>Last Name: <%= session.user.lastName %> </p>
+	<p>Email: <%= session.user.email %> </p>
+
+	<% } %>
+
 	</div> <!-- /container -->
 
 <% include footer.html %>

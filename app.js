@@ -1,6 +1,7 @@
 // Charleston Paddler Web Application
 // 
 // Author: Jake Wisse
+// Github Repo: https://github.com/jakewisse/csci332-final-project
 
 // Modules
 var express = require('express'),
@@ -16,26 +17,23 @@ var connection = mysql.createConnection({
     //'multipleStatements': true
 });
 
-// Object to store state (i.e. session, but really simple)
-var mysession = {
-    user: ''
-}
 
-//
 function checkAuth(req, res, next) {
-    if (!req.cookies.user) {
-        mysession.user = '';
-        next();
+
+    // User is not logged in
+    if (!req.session) {
+        res.send("You are not logged in!");
     }
-    else {
-        mysession.user = req.cookies.user;
+
+    // User is logged in
+    else 
         next();
-    }
 }
 
 var app = express();
 app.use(express.bodyParser()); // for POST requests
 app.use(express.cookieParser('notasecret')); // for signing cookies
+app.use(express.cookieSession('notasecret'));
 app.engine('html', require('ejs').__express); // for using the ejs templating engine
 app.listen(8080);
 
@@ -49,7 +47,13 @@ app.use(express.static(__dirname + '/static'));
 
 // Serve index.html
 app.get('/', function(req, res) {
-    res.render('index.html');
+    res.render('index.html', {session: req.session});
+    console.log(req.session);
+});
+
+app.get('/logout', function(req, res) {
+    req.session.user = null;
+    res.render('index.html', {session: req.session});
 });
 
 
@@ -57,6 +61,14 @@ app.get('/', function(req, res) {
 app.get('/signup.html', function(req, res) {
     res.render('signup.html');
 });
+
+// reservation.html
+app.get('/reservation.html', checkAuth, function(req, res) {
+    res.clearCookie('user');
+    res.render('reservation.html');
+});
+
+
 
 
 // Request to create a new user
@@ -81,19 +93,28 @@ app.post('/createAccount', function (req, res) {
 
     // TODO: Execute stored procedure to insert new user
     var query = connection.query(sql, function (err, results) {
-        if (err.code == 'ER_DUP_ENTRY')
-            res.json({success: false, dup: true});
-        else if (err)
-            res.json({success: false, dup: false});
-        else
-            res.json({success: true, dup: false});
+
+        // Success
+        if (!err) {
+            req.session.user = {
+                email: req.body.email,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName
+            }
+
+            res.json({success: true, msg: ''});
+        }
+
+        // Duplicate
+        else if (err.code == 'ER_DUP_ENTRY')
+            res.json({success: false, msg: 'A user already exists with this email!'});
+
+        // Other error
+        else {
+            res.json({success: false,
+                      msg: 'Error inserting new user.\nSQL error code: ' + err.code});
+        }
     });
-
-    // TODO: Set user cookie
-
-    // TODO: Redirect user
-    
-
 });
 
 
