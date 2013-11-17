@@ -78,9 +78,12 @@ app.post('/login', function(req, res) {
     connection.query(sql, function(err, results) {
         
         if (!err) {
-     
-            if (results[0][0].auth == true) {
+            console.log(results);
+            if (results[0][0].auth == 'true') {
                 // User is authenticated
+                req.session.user = {
+                    email: req.body.email
+                }
                 res.json({auth: true, msg: ''});
             } else {
                 res.json({auth: false, msg: 'Incorrect password!'});
@@ -126,9 +129,8 @@ app.post('/createAccount', function (req, res) {
         // Success
         if (!err) {
             req.session.user = {
-                email: req.body.email,
-                firstName: req.body.firstName,
-                lastName: req.body.lastName
+                email: req.body.email
+                // Possible to store more session state here
             }
 
             res.json({success: true, msg: ''});
