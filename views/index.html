@@ -18,14 +18,16 @@
 		<form id="loginForm" >
 			<div class="input-group span6">
         <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
-        <input type="text" class="form-control" placeholder="Email" required autofocus />
+        <input type="text" name="email" class="form-control" placeholder="Email" required autofocus />
     </div>
     <div class="input-group">
         <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-        <input type="password" class="form-control" placeholder="Password" required />
+        <input type="password" name="password" class="form-control" placeholder="Password" required />
     </div>
-		<div style="text-align: center; margin-top: 10px;"><button id="loginButton" class="btn btn-primary">Login</button> or <a href="signup.html">sign up here.</a></div>
+    <div style="text-align: center; margin-top: 10px;"><button id="loginButton" class="btn btn-primary">Login</button> or <a href="signup.html">sign up here.</a></div>
 		</form>
+		
+		
 	</div> <!-- /well -->
 
 	<% } %>
@@ -39,5 +41,21 @@
 	<% } %>
 
 	</div> <!-- /container -->
+
+	<script>
+	$(document).ready(function() {
+		$("#loginForm").submit(function() {
+			$.post('/login',
+						 $("#loginForm").serializeArray(),
+						 function(res) {
+						 		if (res.auth == false)
+						 			alert(res.msg);
+		  			 }
+		  );
+		  event.preventDefault();
+		  return false;
+		});
+	});
+	</script>
 
 <% include footer.html %>

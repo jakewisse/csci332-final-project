@@ -68,14 +68,45 @@ app.get('/reservation.html', checkAuth, function(req, res) {
     res.render('reservation.html');
 });
 
+// Request to login
+//
+app.post('/login', function(req, res) {
+    var sqlParams = [req.body.email, req.body.password];
+
+    var sql = 'CALL checkPassword(' + connection.escape(sqlParams) + ');';
+
+    connection.query(sql, function(err, results) {
+        
+        if (!err) {
+     
+            if (results[0][0].auth == true) {
+                // User is authenticated
+                res.json({auth: true, msg: ''});
+            } else {
+                res.json({auth: false, msg: 'Incorrect password!'});
+            }
+        } else {
+            if (err.sqlState == '02000')
+                res.json({auth: false, msg: 'Sorry, no user exists with that email address.'});
+            else {
+                res.json({auth: false, msg: 'SQL ERROR.\nerr.code: ' + err.code +
+                                            '\nerr.errno: ' + err.errno +
+                                            '\nerr.sqlState ' + err.sqlState});
+            }
+        }
+
+    });
+
+
+});
+
 
 
 
 // Request to create a new user
 //
-// Uses the insertNewUser() stored procedure.  If user email
-// is already in the db, the second query will return 1,
-// if success, 0.
+// Uses the insertNewUser() stored procedure.  We watch for ER_DUP_ENTRY
+// SQL error specifically.
 app.post('/createAccount', function (req, res) {
 
     // Create an object with the request body's params
@@ -90,8 +121,6 @@ app.post('/createAccount', function (req, res) {
 
     var sql = 'CALL insertNewUser(' + connection.escape(sqlParams) + ');';
 
-
-    // TODO: Execute stored procedure to insert new user
     var query = connection.query(sql, function (err, results) {
 
         // Success
