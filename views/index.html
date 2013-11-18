@@ -11,7 +11,7 @@
 
 		<h1 id="welcomeHeader">Welcome to the Charleston Paddler</h1>
 
-	<% if (!session.user) { %>
+	<% if (session.user == null) { %>
 
 	<!-- Login well -->	
 	<div id="login-well" class="form-horizontal well">

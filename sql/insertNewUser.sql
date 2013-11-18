@@ -7,12 +7,11 @@
 	DROP PROCEDURE IF EXISTS insertNewUser$$
 
 	CREATE PROCEDURE insertNewUser (
-			IN email VARCHAR(20),
-			IN pw VARCHAR(20),
-			IN firstName VARCHAR(20),
-			IN lastName VARCHAR(20),
-			IN phone VARCHAR(20)
-			-- OUT err BIT(1)
+			IN email VARCHAR(45),
+			IN pw VARCHAR(45),
+			IN firstName VARCHAR(45),
+			IN lastName VARCHAR(45),
+			IN phone VARCHAR(45)
 		)
 
 	BEGIN

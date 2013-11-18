@@ -3,9 +3,12 @@
 // Author: Jake Wisse
 // Github Repo: https://github.com/jakewisse/csci332-final-project
 
+
 // Modules
 var express = require('express'),
     mysql = require('mysql');
+
+var app = express();
 
 // Initialize MySQL connection and web server
 var connection = mysql.createConnection({
@@ -17,7 +20,17 @@ var connection = mysql.createConnection({
     //'multipleStatements': true
 });
 
+// Express.js Middleware
+app.use(express.bodyParser()); // for POST requests
+app.use(express.cookieParser('notasecret')); // for signing cookies
+app.use(express.cookieSession('notasecret'));
+app.engine('html', require('ejs').__express); // for using the EJS templating engine
+app.set('views', __dirname + '/views'); // Set EJS's views directory
 
+app.listen(8080);
+
+
+//  TODO: Needs to be adapted...
 function checkAuth(req, res, next) {
 
     // User is not logged in
@@ -30,16 +43,10 @@ function checkAuth(req, res, next) {
         next();
 }
 
-var app = express();
-app.use(express.bodyParser()); // for POST requests
-app.use(express.cookieParser('notasecret')); // for signing cookies
-app.use(express.cookieSession('notasecret'));
-app.engine('html', require('ejs').__express); // for using the ejs templating engine
-app.listen(8080);
 
-// Set EJS's views directory
-app.set('views', __dirname + '/views');
-
+/*
+ * ------  HTTP request handlers --------
+ */
 
 // Serve static files
 app.use(express.static(__dirname + '/static'));
@@ -48,28 +55,9 @@ app.use(express.static(__dirname + '/static'));
 // Serve index.html
 app.get('/', function(req, res) {
     res.render('index.html', {session: req.session});
-    console.log(req.session);
 });
 
-app.get('/logout', function(req, res) {
-    req.session.user = null;
-    res.render('index.html', {session: req.session});
-});
-
-
-// signup.html
-app.get('/signup.html', function(req, res) {
-    res.render('signup.html');
-});
-
-// reservation.html
-app.get('/reservation.html', checkAuth, function(req, res) {
-    res.clearCookie('user');
-    res.render('reservation.html');
-});
-
-// Request to login
-//
+// Login
 app.post('/login', function(req, res) {
     var sqlParams = [req.body.email, req.body.password];
 
@@ -78,7 +66,6 @@ app.post('/login', function(req, res) {
     connection.query(sql, function(err, results) {
         
         if (!err) {
-            console.log(results);
             if (results[0][0].auth == 'true') {
                 // User is authenticated
                 req.session.user = {
@@ -97,13 +84,25 @@ app.post('/login', function(req, res) {
                                             '\nerr.sqlState ' + err.sqlState});
             }
         }
-
     });
-
-
 });
 
+// Logout
+app.get('/logout', function(req, res) {
+    req.session.user = null;
+    res.redirect('/');
+});
 
+// signup.html
+app.get('/signup.html', function(req, res) {
+    res.render('signup.html');
+});
+
+// reservation.html
+app.get('/reservation.html', checkAuth, function(req, res) {
+    res.clearCookie('user');
+    res.render('reservation.html');
+});
 
 
 // Request to create a new user
