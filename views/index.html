@@ -13,6 +13,8 @@
 
 	<% if (session.user == null) { %>
 
+
+
 	<!-- Login well -->	
 	<div id="login-well" class="form-horizontal well">
 		<form id="loginForm" >
@@ -33,10 +35,11 @@
 	<% } %>
 	<% if (session.user) { %>
 
-	<h3>User Info</h3>
-	<p>First Name: <%= session.user.firstName %> </p>
-	<p>Last Name: <%= session.user.lastName %> </p>
-	<p>Email: <%= session.user.email %> </p>
+	<h3>User: <%= session.user.email %> </h3>
+	<br />
+	<br />
+
+	<% include reslist.html %>
 
 	<% } %>
 

@@ -7,8 +7,58 @@
 
 <% include header.html %>
 
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+	<style>
+		div.ui-datepicker{
+			font-size:10px;
+		}
+	</style>
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script>
+$(document).ready(function() {
+	$("#datepicker").datepicker({minDate: 0, onSelect: updateList});
+});
+
+var updateList = function() {
+	var date = $("#datepicker").datepicker("getDate");
+	var sqlDateString = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+	$.post('/availableTours',
+		 {date: sqlDateString},
+		 function (results) {
+		 	var $dropdown = $("#timeDropdown");
+		 	$dropdown.html("");
+		 	for (var i = 0; i < results.length; i++) {
+		 		$dropdown.append('<li><a href=\"#\">' + results[i].tourTime + '</a></li>');
+		 	}
+		 });
+};
+</script>
+
 <div class="container">
-<h1>This is a secret page!  Shh...</h1>
+	<h2>Make a reservation</h2>
+	<p>Select a date, and then choose a time slot from the dropdown.</p>
+
+	<div class="row">
+		<div class="col-xs-4">
+			<div id="datepicker"></div></div>
+			<div class="col-xs-8">
+
+				<div class="btn-group">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					Time slot <span class="caret"></span>
+					</button>
+					<ul id="timeDropdown" class="dropdown-menu" role="menu">
+						<li><a href="#">Action</a></li>
+						<li><a href="#">Another action</a></li>
+						<li><a href="#">Something else here</a></li>
+					</ul>
+				</div>
+
+			</div>
+		</div>
+
+
 </div>
 
 <% include footer.html %>

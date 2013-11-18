@@ -16,8 +16,8 @@ var connection = mysql.createConnection({
     'port': 3306,
     'user': 'root',
     'password': 'root',
-    'database': 'ChsPaddler'
-    //'multipleStatements': true
+    'database': 'ChsPaddler',
+    'multipleStatements': true
 });
 
 // Express.js Middleware
@@ -101,7 +101,7 @@ app.get('/signup.html', function(req, res) {
 // reservation.html
 app.get('/reservation.html', checkAuth, function(req, res) {
     res.clearCookie('user');
-    res.render('reservation.html');
+    res.render('reservation.html', {session: req.session});
 });
 
 
@@ -167,6 +167,22 @@ app.post('/addReservation', function (req, res) {
             });
         }
     );
+});
+
+
+// Check to see what tours are available
+app.post('/availableTours', function (req, res) {
+    console.log(req.body);
+    var date = req.body.date;
+
+    connection.query('CALL availableTours(\'' + date + '\')',
+        function (err, results) {
+            if (err)
+                console.log(err);
+            else 
+                res.json(results[0]);
+        });
+
 });
 
 
