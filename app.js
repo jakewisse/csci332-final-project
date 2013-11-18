@@ -59,12 +59,12 @@ app.get('/', function(req, res) {
 
 // Login
 app.post('/login', function(req, res) {
+    
     var sqlParams = [req.body.email, req.body.password];
 
     var sql = 'CALL checkPassword(' + connection.escape(sqlParams) + ');';
 
     connection.query(sql, function(err, results) {
-        
         if (!err) {
             if (results[0][0].auth == 'true') {
                 // User is authenticated

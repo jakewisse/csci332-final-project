@@ -16,10 +16,12 @@
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 <script>
+// Initialize datepicker
 $(document).ready(function() {
 	$("#datepicker").datepicker({minDate: 0, onSelect: updateList});
 });
 
+// Update the list of dropdowns each time a new date is selected.
 var updateList = function() {
 	var date = $("#datepicker").datepicker("getDate");
 	var sqlDateString = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
@@ -29,7 +31,7 @@ var updateList = function() {
 		 	var $dropdown = $("#timeDropdown");
 		 	$dropdown.html("");
 		 	for (var i = 0; i < results.length; i++) {
-		 		$dropdown.append('<li><a href=\"#\">' + results[i].tourTime + '</a></li>');
+		 		$dropdown.append('<option>' + results[i].tourTime + '</option>');
 		 	}
 		 });
 };
@@ -39,24 +41,35 @@ var updateList = function() {
 	<h2>Make a reservation</h2>
 	<p>Select a date, and then choose a time slot from the dropdown.</p>
 
+<div class="container">
 	<div class="row">
-		<div class="col-xs-4">
-			<div id="datepicker"></div></div>
-			<div class="col-xs-8">
+		
+		<div id="datepicker"></div>
+		
+		<label>Select a time: </label>
+		<select id="timeDropdown">
+		</select>
 
-				<div class="btn-group">
-					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-					Time slot <span class="caret"></span>
-					</button>
-					<ul id="timeDropdown" class="dropdown-menu" role="menu">
-						<li><a href="#">Action</a></li>
-						<li><a href="#">Another action</a></li>
-						<li><a href="#">Something else here</a></li>
-					</ul>
-				</div>
+		
+		<label>Group size: </label>
+		<select>
 
-			</div>
-		</div>
+			<option>1</option>
+			<option>2</option>
+			<option>3</option>
+			<option>4</option>
+			<option>5</option>
+			<option>6</option>
+			<option>7</option>
+			<option>8</option>
+		</select>
+
+		<button class="btn btn-primary" id="makeResButton">Make reservation!</button>
+
+</div>
+		
+	</div>
+	
 
 
 </div>
