@@ -6,15 +6,26 @@
 <!-- if user has reservations, display -->
 <h3>Upcoming Reservations</h3>
 <table class="table table-striped">
-<thead>
-  <tr>
-    <th>ID</th>
-    <th>Date</th>
-    <th>Time</th>
-    <th>Group Size</th>
-  </tr>
-</thead>
-<tbody>
-  
-</tbody>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Group Size</th>
+    </tr>
+    <% for (var i = 0; i < reservations.length; i++) { %>
+    <% var d = new Date(reservations[i].Time);  %>
+    <tr>
+      <td><%= reservations[i].idReservation %></td>
+      <td><%= d.toDateString() %></td>
+      <td><%= d.format('h:mm t') %></td>
+      <td><%= reservations[i].GroupSize %></td>
+    </tr>
+    <% } %>
+
+
+  </thead>
+  <tbody>
+
+  </tbody>
 </table>

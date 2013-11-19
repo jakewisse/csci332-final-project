@@ -8,65 +8,85 @@
 <% include header.html %>
 
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-	<style>
-		div.ui-datepicker{
-			font-size:10px;
-		}
-	</style>
-  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<style>
+	div.ui-datepicker{
+		font-size:10px;
+	}
+</style>
+
+
+
+
 <script>
+
 // Initialize datepicker
 $(document).ready(function() {
-	$("#datepicker").datepicker({minDate: 0, onSelect: updateList});
+	$("#datepicker").datepicker({minDate: 1, onSelect: updateList});
+	$("#makeResButton").click(function() {
+		var dateSel = $("#datepicker").datepicker("getDate");
+		var timeSelStr = $("#timeDropdown").val();
+		var hoursSel = timeSelStr.substring(0, timeSelStr.indexOf(':'));
+		dateSel.setHours(hoursSel);
+
+		var groupSize = $("#groupSizeDropdown").val();
+
+		$.post('/addReservation',
+					 {'resDateTime': dateSel,
+					  'groupSize': groupSize},
+					  function(res) {
+					  	if (res.status == "OK")
+					  		console.log(res);
+					  });
+	})
 });
 
 // Update the list of dropdowns each time a new date is selected.
 var updateList = function() {
 	var date = $("#datepicker").datepicker("getDate");
-	var sqlDateString = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
 	$.post('/availableTours',
-		 {date: sqlDateString},
-		 function (results) {
-		 	var $dropdown = $("#timeDropdown");
-		 	$dropdown.html("");
-		 	for (var i = 0; i < results.length; i++) {
-		 		$dropdown.append('<option>' + results[i].tourTime + '</option>');
-		 	}
-		 });
+		{'date': date},
+		function (results) {
+			var $dropdown = $("#timeDropdown");
+			$dropdown.html("");
+			for (var i = 0; i < results.length; i++) {
+				$dropdown.append('<option>' + results[i].tourTime + '</option>');
+			}
+		});
 };
+
 </script>
 
+<!-- Make reservation markup -->
 <div class="container">
 	<h2>Make a reservation</h2>
 	<p>Select a date, and then choose a time slot from the dropdown.</p>
 
-<div class="container">
-	<div class="row">
-		
-		<div id="datepicker"></div>
-		
-		<label>Select a time: </label>
-		<select id="timeDropdown">
-		</select>
+	<div class="container">
+		<div class="row">
 
-		
-		<label>Group size: </label>
-		<select>
+			<div id="datepicker"></div>
 
-			<option>1</option>
-			<option>2</option>
-			<option>3</option>
-			<option>4</option>
-			<option>5</option>
-			<option>6</option>
-			<option>7</option>
-			<option>8</option>
-		</select>
+			<label>Select a time: </label>
+			<select id="timeDropdown">
+			</select>
 
-		<button class="btn btn-primary" id="makeResButton">Make reservation!</button>
 
-</div>
+			<label>Group size: </label>
+			<select id="groupSizeDropdown">
+
+				<option>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+				<option>5</option>
+				<option>6</option>
+				<option>7</option>
+				<option>8</option>
+			</select>
+
+			<button class="btn btn-primary" id="makeResButton">Make reservation!</button>
+
+		</div>
 		
 	</div>
 	

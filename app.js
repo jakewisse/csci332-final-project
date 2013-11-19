@@ -54,12 +54,31 @@ app.use(express.static(__dirname + '/static'));
 
 // Serve index.html
 app.get('/', function(req, res) {
-    res.render('index.html', {session: req.session});
+    var vars = {};
+
+    // Don't query the db if the user isn't logged in
+    if (req.session.user) {
+        connection.query('CALL selectResByUser(?);', req.session.user.email,
+            function(err, results) {
+                if (!err) {
+                    var reservations = results[0];
+                    res.render('index.html', {session: req.session, 'reservations': reservations});
+                }
+                else {
+                    console.log(err);
+                    res.render('index.html', {session: req.session});
+                }
+            });
+
+    } else {
+        res.render('index.html', {session: req.session});
+    }
+
 });
 
 // Login
 app.post('/login', function(req, res) {
-    
+
     var sqlParams = [req.body.email, req.body.password];
 
     var sql = 'CALL checkPassword(' + connection.escape(sqlParams) + ');';
@@ -99,8 +118,7 @@ app.get('/signup.html', function(req, res) {
 });
 
 // reservation.html
-app.get('/reservation.html', checkAuth, function(req, res) {
-    res.clearCookie('user');
+app.get('/reservation.html', function(req, res) {
     res.render('reservation.html', {session: req.session});
 });
 
@@ -152,19 +170,26 @@ app.post('/createAccount', function (req, res) {
 app.post('/addReservation', function (req, res) {
     var post =
     {
-        'Phone': req.body.phone,
-        'Email': req.body.email,
-        'FirstName': req.body.firstName,
-        'LastName': req.body.lastName,
-        'Email': req.body.email
+        'Time': new Date(req.body.resDateTime),
+        'GroupSize': req.body.groupSize,
+        'User_Email': req.session.user.email,
     };
+
     connection.query('INSERT INTO Reservation SET ?', post, 
         function (err, result) {
-            if (err) throw err;
-            res.json({
-                'status': 'OK',
-                'id': result.insertId
-            });
+            if (err)
+                console.log(err);
+            else {
+                res.json({
+                    'status': 'OK',
+                    'echo': {
+                        'id': result.insertId,
+                        'Time': post.Time,
+                        'GroupSize': post.GroupSize,
+                        'User_Email': post.User_Email
+                    }
+                });
+            }
         }
     );
 });
@@ -172,17 +197,53 @@ app.post('/addReservation', function (req, res) {
 
 // Check to see what tours are available
 app.post('/availableTours', function (req, res) {
-    console.log(req.body);
-    var date = req.body.date;
+    var date = new Date(req.body.date);
 
-    connection.query('CALL availableTours(\'' + date + '\')',
+    //connection.query('CALL availableTours(\'' + date + '\')',
+    connection.query('CALL availableTours(?)', date,
         function (err, results) {
             if (err)
                 console.log(err);
             else 
+                //console.log(results);
                 res.json(results[0]);
         });
 
 });
+
+
+
+// Date formatting
+Date.prototype.format = function (format) //author: meizz
+{
+    var hours = this.getHours();
+    var ttime = "AM";
+    if(format.indexOf("t") > -1 && hours > 12)
+    {
+        hours = hours - 12;
+        ttime = "PM";
+    }
+
+    var o = {
+        "M+": this.getMonth() + 1, //month
+        "d+": this.getDate(),    //day
+        "h+": hours,   //hour
+        "m+": this.getMinutes(), //minute
+        "s+": this.getSeconds(), //second
+        "q+": Math.floor((this.getMonth() + 3) / 3),  //quarter
+        "S": this.getMilliseconds(), //millisecond,
+        "t+": ttime
+    }
+
+    if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
+      (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o) if (new RegExp("(" + k + ")").test(format))
+            format = format.replace(RegExp.$1,
+              RegExp.$1.length == 1 ? o[k] :
+              ("00" + o[k]).substr(("" + o[k]).length));
+        return format;
+}
+
+
 
 
