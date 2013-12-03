@@ -1,7 +1,10 @@
-// Charleston Paddler Web Application
-// 
-// Author: Jake Wisse
-// Github Repo: https://github.com/jakewisse/csci332-final-project
+/**
+ * Charleston Paddler Web Application
+ *
+ * Author: Jake Wisse
+ * Github Repo: https://github.com/jakewisse/csci332-final-project
+ * 
+ */
 
 
 // Modules
@@ -62,6 +65,7 @@ app.get('/', function(req, res) {
             function(err, results) {
                 if (!err) {
                     var reservations = results[0];
+                    console.log(reservations);
                     res.render('index.html', {session: req.session, 'reservations': reservations});
                 }
                 else {
@@ -98,10 +102,12 @@ app.post('/login', function(req, res) {
             if (err.sqlState == '02000')
                 res.json({auth: false, msg: 'Sorry, no user exists with that email address.'});
             else {
-                res.json({auth: false, msg: 'SQL ERROR.\nerr.code: ' + err.code +
-                                            '\nerr.errno: ' + err.errno +
-                                            '\nerr.sqlState ' + err.sqlState});
-            }
+                res.json({auth: false,
+                          msg: 'SQL ERROR.\nerr.code: ' + err.code +
+                               '\nerr.errno: ' + err.errno +
+                               '\nerr.sqlState ' + err.sqlState
+                         });
+    }
         }
     });
 });
@@ -119,7 +125,15 @@ app.get('/signup.html', function(req, res) {
 
 // reservation.html
 app.get('/reservation.html', function(req, res) {
-    res.render('reservation.html', {session: req.session});
+
+    connection.query('CALL availableTours();', function (err, results) {
+        if (err) {
+            console.log(err);
+            res.redirect('/');
+        } else {
+            res.render('reservation.html', {session: req.session, availTours: results[0]});
+        }
+    })
 });
 
 
@@ -168,26 +182,30 @@ app.post('/createAccount', function (req, res) {
 
 // Add Reservation to DB
 app.post('/addReservation', function (req, res) {
-    var post =
-    {
-        'Time': new Date(req.body.resDateTime),
-        'GroupSize': req.body.groupSize,
-        'User_Email': req.session.user.email,
-    };
 
-    connection.query('INSERT INTO Reservation SET ?', post, 
+    console.log(req);
+
+    var sqlParams =
+        {
+            'GroupSize': req.body.groupSize,
+            'User_Email': req.session.user.email,
+            'Tour_idTour': req.body.idTour
+        };
+
+
+    connection.query('INSERT INTO Reservation SET ?', sqlParams, 
         function (err, result) {
-            if (err)
+            if (err) {
                 console.log(err);
+                res.json({
+                    'status': "ERROR",
+                    'error': err
+                });
+            }
             else {
                 res.json({
                     'status': 'OK',
-                    'echo': {
-                        'id': result.insertId,
-                        'Time': post.Time,
-                        'GroupSize': post.GroupSize,
-                        'User_Email': post.User_Email
-                    }
+                    'error': null
                 });
             }
         }
@@ -197,19 +215,38 @@ app.post('/addReservation', function (req, res) {
 
 // Check to see what tours are available
 app.post('/availableTours', function (req, res) {
-    var date = new Date(req.body.date);
 
-    //connection.query('CALL availableTours(\'' + date + '\')',
-    connection.query('CALL availableTours(?)', date,
-        function (err, results) {
-            if (err)
-                console.log(err);
-            else 
-                //console.log(results);
-                res.json(results[0]);
-        });
-
+    var q = connection.query('CALL availableTours()', function (err, results) {
+        if (err)
+            console.log(err);
+        else {
+            console.log('Sending JSON');
+            console.log(results);
+            res.json(results);
+        }
+    })
 });
+
+
+app.post('/availableToursByDate', function (req, res) {
+
+    var d = new Date(req.body.d);
+console.log(d.format('yyyy-MM-dd'));
+
+
+    connection.query('CALL availTourInfoByDate(\'' + d.format('yyyy-MM-dd') + '\');',
+        function (err, results) {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                console.log(results);
+                res.json(results[0]);
+            }
+        })
+})
+
+
 
 
 
@@ -243,7 +280,6 @@ Date.prototype.format = function (format) //author: meizz
               ("00" + o[k]).substr(("" + o[k]).length));
         return format;
 }
-
 
 
 

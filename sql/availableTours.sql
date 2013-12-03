@@ -1,19 +1,25 @@
-delimiter $$
+-- ----------------------------
+-- availableTours.sql
+-- ----------------------------
+-- This stored procedure will select the tours that are still available
+-- as well as their current size.
 
-use ChsPaddler $$
+DELIMITER $$
 
-drop procedure if exists availableTours $$
+DROP PROCEDURE IF EXISTS availableTours $$
 
-create procedure availableTours (in tourDate date)
+CREATE PROCEDURE availableTours()
 
-begin
-drop table if exists hours;
-create temporary table hours (tourTime time);
-insert into hours values ('09:00:00'), ('13:00:00'), ('15:00:00');
+BEGIN
 
-select `tourTime` from `hours` where `tourTime` not in
-	(select date_format(`Time`, '%H:%i:%s') as `tourTime` from `Reservation` where date_format(`Time`, '%Y-%m-%d') = tourDate);
+SELECT t.idTour idTour, t.TourDatetime tourDatetime, t.Capacity Capacity, coalesce(sum(r.GroupSize), 0) currentSize
+FROM Tour t
+LEFT JOIN Reservation r ON r.Tour_idTour = t.idTour
+WHERE t.TourDatetime >= CURDATE() AND currentSize < Capacity
+GROUP BY t.idTour
+HAVING currentSize < Capacity
+ORDER BY t.TourDatetime;
 
-drop table hours;
+END	$$
 
-end
+DELIMITER ;

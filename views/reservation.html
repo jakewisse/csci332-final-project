@@ -12,6 +12,28 @@
 	div.ui-datepicker{
 		font-size:10px;
 	}
+
+	#datepicker {
+		margin-bottom: 30px;
+	}
+
+	#tour-table > table > tbody > tr {
+		cursor: pointer;
+	}
+
+	#tour-table > table > tbody > tr:hover, #tour-table > table > tbody > tr:hover th {
+		background-color: #fcffdb;
+	}
+	
+	#tour-table > table > tbody .selected {
+		background-color: #fcffdb;
+	}
+
+	#groupSizeDiv {
+		margin-bottom: 15px;
+	}
+
+
 </style>
 
 
@@ -19,79 +41,185 @@
 
 <script>
 
+// availTours is a list of ALL the available tours
+// Used for populating the datepicker.
+var availTours = <%- JSON.stringify(availTours) %>;
+
+var dateSelTours;
+
+var currentRes = {};
+
+
 // Initialize datepicker
 $(document).ready(function() {
-	$("#datepicker").datepicker({minDate: 1, onSelect: updateList});
-	$("#makeResButton").click(function() {
-		var dateSel = $("#datepicker").datepicker("getDate");
-		var timeSelStr = $("#timeDropdown").val();
-		var hoursSel = timeSelStr.substring(0, timeSelStr.indexOf(':'));
-		dateSel.setHours(hoursSel);
+	$("#datepicker").datepicker({
+		numberOfMonths: 3,
+		beforeShowDay: function (d) {
+			var i;
+			var l = availTours.length; 
+			for (i = 0; i < l; i++) {
+				if (d.getTime() == moment(availTours[i].tourDatetime).startOf("day").toDate().getTime())
+					return [true, "", "available"];
+			}
+			return [false, "", "unavailable"];
+		},
+		onSelect: function (dateText, inst) {
+			$.post('/availableToursByDate',
+						 {'d': new Date(dateText)},
+						 function (res) {
+						 	dateSelTours = res;
+						 	updateTourTable(res);
+						 }
+		  );
+		}
+	});
 
-		var groupSize = $("#groupSizeDropdown").val();
+
+	$("#tour-table").on("click", "table > tbody > tr", function (event) {
+
+		var tourSel = dateSelTours[$(this).index()];
+		currentRes.idTour = tourSel.idTour;
+
+		$(this).siblings(".selected").removeClass("selected");
+		$(this).addClass("selected");
+		var maxSize = $(this).children(':nth-Child(4)').text();
+		$("#groupSize").empty();
+		for (var i = 1; i <= maxSize; i++) {
+			$("#groupSize").append("<option value=\"" + i + "\">" + i + "</option>");
+		}
+	});
+
+	$("#makeResButton").click( function () {
+		currentRes.groupSize = $("#groupSize").val();
+
+		var $dl = $(".modal-body > dl");
+		$dl.children(":nth-Child(2)").html(currentRes.idTour);
+		$dl.children(":nth-Child(4)").html(currentRes.dateString);
+		$dl.children(":nth-Child(8)").html(currentRes.groupSize);
+		$dl.children(":nth-Child(6)").html($("#tour-table .selected").children(":nth-Child(2)").text());
+		$dl.children(":nth-Child(10)").html($("#tour-table .selected").children(":nth-Child(3)").text());
+
+	});
+
+	$("#submitRes").click( function (e) {
 
 		$.post('/addReservation',
-					 {'resDateTime': dateSel,
-					  'groupSize': groupSize},
-					  function(res) {
-					  	if (res.status == "OK")
-					  		console.log(res);
-					  });
-	})
+			{
+				'idTour': currentRes.idTour,
+				'groupSize': currentRes.groupSize
+			},
+			function (res) {
+				if (res.status == 'OK') {
+					alert("Thanks for your reservation.\nWe're looking forward to seeing you soon!");
+					window.location = '/';
+				}
+				else {
+					alert ("Uh oh!  Something went wrong...\nError: " + res.error);
+				}
+			});
+
+	});
+
 });
 
-// Update the list of dropdowns each time a new date is selected.
-var updateList = function() {
-	var date = $("#datepicker").datepicker("getDate");
-	$.post('/availableTours',
-		{'date': date},
-		function (results) {
-			var $dropdown = $("#timeDropdown");
-			$dropdown.html("");
-			for (var i = 0; i < results.length; i++) {
-				$dropdown.append('<option>' + results[i].tourTime + '</option>');
-			}
-		});
-};
+var updateTourTable = function (data) {
+
+	var $tableBody = $("#tour-table tbody");
+
+	$tableBody.empty();
+
+	var dateString = moment(data[0].tourDatetime.substring(0, 10), "YYYY-MM-DD").format("MMMM D, YYYY");
+	currentRes.dateString = dateString;
+	$("#tour-table > h4").html("Available tours on " + dateString);
+
+
+	for (var i = 0; i < data.length; i++) {
+		var d = new Date(data[i].tourDatetime)
+		var t = moment(d).format("h:mm a");
+		$tableBody.append("<tr>" + 
+									"<td>" + data[i].idTour + "</td>" + 
+									"<td>" + t + "</td>" + 
+									"<td>" + data[i].guideName + "</td>" + 
+									"<td>" + data[i].spaceLeft + "</td>" + 
+									"</tr>");
+	}
+
+}
 
 </script>
 
 <!-- Make reservation markup -->
 <div class="container">
 	<h2>Make a reservation</h2>
-	<p>Select a date, and then choose a time slot from the dropdown.</p>
+	<p>Select a date, and then click a tour from the list.</p>
 
 	<div class="container">
 		<div class="row">
-
 			<div id="datepicker"></div>
+		</div>
 
-			<label>Select a time: </label>
-			<select id="timeDropdown">
-			</select>
+		<div id="tour-table" class="row">
+			<h4>Available tours</h4>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Time</th>
+						<th>Guide</th>
+						<th>Spaces Left</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
 
-
+		<div id="groupSizeDiv" class="row">
 			<label>Group size: </label>
-			<select id="groupSizeDropdown">
-
-				<option>1</option>
-				<option>2</option>
-				<option>3</option>
-				<option>4</option>
-				<option>5</option>
-				<option>6</option>
-				<option>7</option>
-				<option>8</option>
+			<select id="groupSize">
 			</select>
+		</div>
 
-			<button class="btn btn-primary" id="makeResButton">Make reservation!</button>
-
+			
+		<div class="row">
+			<button class="btn btn-primary" id="makeResButton" data-toggle="modal" data-target="#confirmModal">Make reservation!</button>
 		</div>
 		
 	</div>
-	
-
 
 </div>
+
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Reservation details</h4>
+      </div>
+      <div class="modal-body">
+
+      	<dl class="dl-horizontal">
+      		<dt>Tour ID</dt>
+      		<dd>A number</dd>
+      		<dt>Date</dt>
+      		<dd></dd>
+      		<dt>Time</dt>
+      		<dd></dd>
+      		<dt>Group size</dt>
+      		<dd></dd>
+      		<dt>Tour guide</dt>
+      		<dd></dd>
+      	</dl>
+      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="submitRes" type="button" class="btn btn-primary">Confirm reservation!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <% include footer.html %>

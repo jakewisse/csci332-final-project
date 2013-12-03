@@ -12,14 +12,16 @@
       <th>Date</th>
       <th>Time</th>
       <th>Group Size</th>
+      <th>Guide</th>
     </tr>
     <% for (var i = 0; i < reservations.length; i++) { %>
-    <% var d = new Date(reservations[i].Time);  %>
+    <% var d = new Date(reservations[i].TourDatetime);  %>
     <tr>
       <td><%= reservations[i].idReservation %></td>
       <td><%= d.toDateString() %></td>
       <td><%= d.format('h:mm t') %></td>
       <td><%= reservations[i].GroupSize %></td>
+      <td><%= reservations[i].guideName %></td>
     </tr>
     <% } %>
 

@@ -9,7 +9,7 @@
 
 	<div class="container">
 
-		<h1 id="welcomeHeader">Welcome to the Charleston Paddler</h1>
+		<h1 id="welcomeHeader">Charleston Paddler Eco-Tours</h1>
 
 	<% if (session.user == null) { %>
 
@@ -19,27 +19,25 @@
 	<div id="login-well" class="form-horizontal well">
 		<form id="loginForm" >
 			<div class="input-group span6">
-        <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
-        <input type="text" name="email" class="form-control" placeholder="Email" required autofocus />
-    </div>
-    <div class="input-group">
-        <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-        <input type="password" name="password" class="form-control" placeholder="Password" required />
-    </div>
-    <div style="text-align: center; margin-top: 10px;"><button id="loginButton" class="btn btn-primary">Login</button> or <a href="signup.html">sign up here.</a></div>
+				<span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+				<input type="text" name="email" class="form-control" placeholder="Email" required autofocus />
+			</div>
+			<div class="input-group">
+				<span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+				<input id="passwordField" type="password" name="password" class="form-control" placeholder="Password" required />
+			</div>
+			<div style="text-align: center; margin-top: 10px;"><button id="loginButton" class="btn btn-primary">Login</button> or <a href="signup.html">sign up here.</a></div>
 		</form>
-		
-		
 	</div> <!-- /well -->
 
 	<% } %>
 	<% if (session.user) { %>
 
-	<h3>User: <%= session.user.email %> </h3>
+	<label>User:</label> <%= session.user.email %> 
 	<br />
 	<br />
 
-	<% include reslist.html %>
+	<% include reslist.html %> 
 
 	<% } %>
 
@@ -51,8 +49,10 @@
 			$.post('/login',
 						 $("#loginForm").serializeArray(),
 						 function(res) {
-						 		if (res.auth == false)
+						 		if (res.auth == false) {
 						 			alert(res.msg);
+						 			$("#passwordField").val('');
+						 		}
 						 		else
 						 			window.location = '/';
 		  			 }
