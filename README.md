@@ -36,4 +36,10 @@ Change the port which the app listens on to 80, or whatever you would like on li
 app.listen(PORT_OF_YOUR_CHOOSING);
 ```
 
+At this point, the app should work just fine, but it might be a little boring because there are no tours or guides in the datebase.  I was planning on implementing an admin console where guides and tours could be added, but I ran out of time.  So instead just open up a SQL query and execute:
+
+```sql
+CALL initTourAndGuideTables();
+```
+
 And that's it!  You can now start the app by running `node app.js`.

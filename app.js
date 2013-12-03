@@ -65,7 +65,6 @@ app.get('/', function(req, res) {
             function(err, results) {
                 if (!err) {
                     var reservations = results[0];
-                    console.log(reservations);
                     res.render('index.html', {session: req.session, 'reservations': reservations});
                 }
                 else {
@@ -183,8 +182,6 @@ app.post('/createAccount', function (req, res) {
 // Add Reservation to DB
 app.post('/addReservation', function (req, res) {
 
-    console.log(req);
-
     var sqlParams =
         {
             'GroupSize': req.body.groupSize,
@@ -220,8 +217,6 @@ app.post('/availableTours', function (req, res) {
         if (err)
             console.log(err);
         else {
-            console.log('Sending JSON');
-            console.log(results);
             res.json(results);
         }
     })
@@ -231,8 +226,6 @@ app.post('/availableTours', function (req, res) {
 app.post('/availableToursByDate', function (req, res) {
 
     var d = new Date(req.body.d);
-console.log(d.format('yyyy-MM-dd'));
-
 
     connection.query('CALL availTourInfoByDate(\'' + d.format('yyyy-MM-dd') + '\');',
         function (err, results) {
@@ -240,7 +233,6 @@ console.log(d.format('yyyy-MM-dd'));
                 console.log(err);
             }
             else {
-                console.log(results);
                 res.json(results[0]);
             }
         })
