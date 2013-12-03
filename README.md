@@ -30,7 +30,7 @@ var connection = mysql.createConnection({
 });
 ```
 
-Change the port which the app listens on to, 80, or whatever you would like on line 33 of `app.js`:
+Change the port which the app listens on to 80, or whatever you would like on line 33 of `app.js`:
 
 ```javascript
 app.listen(PORT_OF_YOUR_CHOOSING);
