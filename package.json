@@ -9,7 +9,7 @@
     "ejs": "0.8.x",
     "moment": "~2.4.0"
   },
-  "repository": "",
+  "repository": "https://github.com/jakewisse/csci332-final-project.git",
   "author": "Jake Wisse",
   "license": "BSD"
 }
